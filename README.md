@@ -75,7 +75,8 @@ The main loop of WFC does the following:
 1. Start with an empty grid of the desired size
 2. Iteratively, while an empty position exists on the grid:
     1. Select an empty position on the grid (sometimes refered to as *Selection Heuristic*)
-    2. Decide which one of the **valid** tiles to put in the target position (refered to as *Decision Process*)
+    2. Decide which one of the **valid** tiles to put in the target position (refered to as *Decision Process*). By deciding this tile, we say that the wave function for this position has collapsed to one single tile value.
+    3. Update the set of **valid** tiles. Collapsing one position may eliminiate some of the options at other positions based on the constraints.
 3. Once all positions have been filled with tiles, the output has been generated and the algorithm terminates.
 
 A tile is considered **valid** for a position if the tile is not resulting in contradiction with the available constraints. These constraints decide which pair of tiles can
@@ -126,17 +127,54 @@ For visualizing the *Decision Heuristic*s side-by-side, `visualize_wfc_decision_
 
 This implementation contains the following files:
 
-1. ``
+1. `image.py` defines an image unit as a 2D array of pixels which can be converted to a single number with the `_get_number` function.
+In this README file we refer to image unit as tile, but it can be any unit of image we assign to positions on the image.
+Some example of this unit which are implemented in here are `Tile`, and two bigger `Pattern`s called `nxmPattern` and `UpLeftLPattern`.
+The `nxmPattern` is a rectangular pattern with the shape n by m (nxm tiles in total).
+The `UpLeftLPattern` is a L shaped pattern containing a center tile, n tiles above it, and m tiles left of it (n+m+1 tiles in total).
+New patterns can be easily defined by listing the set of tiles in the pattern as relative indices to a center tile.
+2. `tiled_image.py` defines a process of extracting the image units from an image. The image contains a 2D array of numbers representing tiles at each position of the input, and a one-to-one mapping from number to tile.
+3. `image_distribution` is the class which extracts the frequency of tiles, frequency of tile pairs, and frequency of tiles in different contexts. It also extracts the 
+valid tile pairs.
+4. `WFC.py` is the WFC implemetation containing different heuristics. For more details about how this is implemented, refer to the [WFC Implementation](#wfc-implementation) subsection.
+5. `utility.py` contains some utility functions used by other files.
 
 More information about each of the files can be found in the subsections.
 
+### WFC Implementation
+
 As mentioned above, the core loop of WFC is implemented in the `WFC.py` file. This core loop uses a supermap to run the WFC. Supermap is a 2D map representing the output.
-Each position (i, j) in the supermap is a list of possible **valid** options available for the position (i, j). Each option is a single number which represents a tile or
-a pattern (the one-to-one mapping from this number to pixel values is in the `TiledImage` object, and WFC only works with the number representing that option).
+Each position (i, j) in the supermap is a list of possible **valid** options available for the position (i, j). If only one option is available at some position, that position have already collapsed. If all positions have only one option each, the output is ready. If at some position there are no options available, depending on the `backtrack` paramter it either returns None for that position or uses backtrack to revert steps and try other options.
+
+Each option is a single number which represents a tile or a pattern. The one-to-one mapping from this number to pixel values is in the `TiledImage` object, and WFC only works with the number representing that option. To get the final pixel values, the result of `WFC.generate` function should be passed to `TiledImage.from_generated` function.
+
+### Selection Heuristics Implementation
+
+The *Selection Heuristic* is implemented in a single function in the `WFC.py` file called `_get_entropy`. Given the supermap, x, y, and output size, this function returns the entropy of position (x, y) of supermap. The entropy can be any number, and the WFC algorithm will select the empty position with minimum entropy at each step to collapse.
+
+For instance, the `TOP_LEFT` entropy option returns `i*n+j` as entropy of position (i, j), which n being the number of columns. This means that 
+
+### Decision Heuristics Implementation
+
 ## Porting Context-sensitive Heuristic
 
-For all of these options, the only code difference is in the `_get_entropy` function of the `WFC.py` file. This function returns a single value as the entropy, which
-will be used to select an empty position with the minimum entropy value. For example, `TOP_LEFT` return `i*n+j` as entropy of position (i, j).
+## References
+
+## TODO list
+
+The following features have been implemetned but are not part of this repository yet:
+
+- Interactive WFC notebook
+- Resemblance Metrics
+- Gif generator
+- 3D WFC
+- Expressive Range Analysis
+
+If you think some other features should be added here or some bugs should be fixed, please submit an issue.
+
+Alternatively if you have already implemented some features or fixed something that you want to add to the repository, please submit a pull request.
+
+If you want to talk about this feel free to contact me by emailing me at bbateni@ucsc.edu.
 
 ## FAQ
 
@@ -147,4 +185,16 @@ exection time but will search all the available options to get a valid result. I
 
 **There are some artifact in the results: there is a diagonal pattern seen in the outputs. What should I do?**
 
-This shows some bias in the output, which can be a result of selection heuristic.
+This shows some bias in the output, which can be a result of selection heuristic. Changing the selection heuristic to `SHANNON` or `NUMBER_OF_OPTIONS` will resolve this problem.
+
+**Running the WFC algorithm with the same seed results in different values. How can I solve this?**
+
+The reason is that the main process which turns a tile to a number uses the python hash function. The python hash function is undeterministic and changes every time you run the program because of security reasons. To change this, you can change hash method by changing
+```
+GLOBAL_HASH_TYPE = HASH_TYPE.PYTHON_HASH
+```
+to
+```
+GLOBAL_HASH_TYPE = HASH_TYPE.NUMBER_HASH
+```
+in the `utility.py` file. The `NUMBER_HASH` hashing method is deterministic, but will make the tile extraction process significantly slower, but doesn't have any impact on the execution time of other parts such as the WFC algorithm.
