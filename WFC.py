@@ -3,12 +3,12 @@ from image_distribution import ImageDistribution
 from utility import in_bound
 
 class WeightingOptions:
-    NONE = 1 # Uniform Distribution
-    FREQUENCY_WEIGHTED = 2 # based on the frequency of units #Gumin's
-    CONTEXT_WEIGHTED = 3 # based on the conditional prbability (conditioned by context around it)
+    UNIFORM = 1 # Uniform Distribution
+    TILE_FREQUENCY = 2 # based on the frequency of units #Gumin's
+    CONTEXT_SENSITIVE = 3 # based on the conditional prbability (conditioned by context around it)
 
 class UpdatingOptions:
-    NEIGHBOR = 1
+    NEIGHBOR = 1 # Experimental, propagates the constraints only to immediate neighbors
     CHAIN = 2 #Gumin's
 
 class EntropyOptions:
@@ -18,12 +18,9 @@ class EntropyOptions:
     TOP_RIGHT = 4
 
 class ExistingTile:
-    def __init__(self, pos, tile_number):
-        self.pos = pos
-        self.tile_number = tile_number
-    
-    def from_tile(pos, tile):
-        return ExistingTile(pos, tile.number)
+  def __init__(self, pos: Tuple[int, int], tile_number: int):
+    self.pos = pos
+    self.tile_number = tile_number
 
 class WFC:
     def __init__(self, dist: ImageDistribution, weighting_option, updating_option, entropy_option):
@@ -51,11 +48,11 @@ class WFC:
         return (context[0], context[1], context[2], context[3], context[4])
     
     def _get_weights(self, supermap, x, y):
-        if self.weighting_option == WeightingOptions.FREQUENCY_WEIGHTED:
+        if self.weighting_option == WeightingOptions.TILE_FREQUENCY:
             return np.array(list(map(lambda u: self.dist.get_unit_frequency(u), supermap[x, y])))
-        elif self.weighting_option == WeightingOptions.NONE:
+        elif self.weighting_option == WeightingOptions.UNIFORM:
             return np.ones(supermap[x, y].shape)
-        elif self.weighting_option == WeightingOptions.CONTEXT_WEIGHTED:
+        elif self.weighting_option == WeightingOptions.CONTEXT_SENSITIVE:
             weights = np.array(list(map(lambda u: self.dist.get_context_frequency(self._get_context(supermap, u, x, y)), supermap[x, y])))
             if np.sum(weights) == 0:
                 return np.array(list(map(lambda u: self.dist.get_unit_frequency(u), supermap[x, y]))) # fall-back: return frequency weighted
@@ -115,17 +112,21 @@ class WFC:
                             changed_queue.append((x+dx, y+dy))
         return not invalid
 
-    def _get_initial_supermap(self, map_size): # TODO consider existing tiles
+    def _get_initial_supermap(self, map_size, existing_tiles):
         options = self._get_options()
         supermap = np.array([[None for _ in range(map_size[1])] for _ in range(map_size[0])], dtype=object)
         for i in range(map_size[0]):
             for j in range(map_size[1]):
                 supermap[i, j] = options.copy()
+        for existing_tile in existing_tiles:
+            i, j = existing_tile.pos
+            supermap[i, j] = np.array([existing_tile.tile_number])
+            self._update_supermap(x, y, supermap)
         return supermap
 
     def generate_bt(self, map_size, existing_tiles=[]):
         self._bt_counter = 0
-        supermap = self._get_initial_supermap(map_size)
+        supermap = self._get_initial_supermap(map_size, existing_tiles)
         tested = np.array([[None for _ in range(map_size[1])] for _ in range(map_size[0])], dtype=object)
         for i in range(map_size[0]):
             for j in range(map_size[1]):
@@ -167,7 +168,7 @@ class WFC:
         np.random.seed(seed)
         if backtrack:
             return self.generate_bt(map_size, existing_tiles)
-        supermap = self._get_initial_supermap(map_size)
+        supermap = self._get_initial_supermap(map_size, existing_tiles)
         while True:
             x, y = self._get_position_to_collapse(supermap, map_size)
             if x is None or y is None:

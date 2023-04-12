@@ -19,7 +19,7 @@ def get_image_data(filename):
     arr = np.asarray(im)/255
     return arr
 
-def draw_tile_vs_pattern(image_data, tile_size, pattern_generator_func):
+def visualize_tile_vs_pattern(image_data, tile_size, pattern_generator_func):
     n, m, _ = image_data.shape
     if n % tile_size[0] != 0 or m % tile_size[1] != 0:
         print("Warning: the data is not divisible by the tile size, not all of the data is shown.")
@@ -43,7 +43,7 @@ def draw_tile_vs_pattern(image_data, tile_size, pattern_generator_func):
     plt.show()
 
 
-def draw_wfc_decision_heuristics(unit_generator, size, seed=42, backtrack=False, axs=None,
+def visualize_wfc_decision_heuristics(unit_generator, size, seed=42, backtrack=False, axs=None,
                                  entropy_option=EntropyOptions.TOP_LEFT, updating_option=UpdatingOptions.CHAIN):
     print("breaking input into tiles...")
     ti = TiledImage.from_unit_generator(unit_generator)
@@ -56,20 +56,20 @@ def draw_wfc_decision_heuristics(unit_generator, size, seed=42, backtrack=False,
     id.train(ti)
     print("running wfc with uniform decision heuristic...")
     axs[1].set_title('Uniform', fontsize=22)
-    wfc = WFC(id, WeightingOptions.NONE, updating_option, entropy_option)
+    wfc = WFC(id, WeightingOptions.UNIFORM, updating_option, entropy_option)
     ti.from_generated(wfc.generate(size, seed=seed, backtrack=backtrack)).display(axs[1])
     print("running wfc with tile-frequency decision heuristic...")
     axs[2].set_title('Tile Frequency', fontsize=22)
-    wfc = WFC(id, WeightingOptions.FREQUENCY_WEIGHTED, updating_option, entropy_option)
+    wfc = WFC(id, WeightingOptions.TILE_FREQUENCY, updating_option, entropy_option)
     ti.from_generated(wfc.generate(size, seed=seed, backtrack=backtrack)).display(axs[2])
     print("running wfc with context-sensitive decision heuristic...")
     axs[3].set_title('Context-sensitive', fontsize=22)
-    wfc = WFC(id, WeightingOptions.CONTEXT_WEIGHTED, updating_option, entropy_option)
+    wfc = WFC(id, WeightingOptions.CONTEXT_SENSITIVE, updating_option, entropy_option)
     ti.from_generated(wfc.generate(size, seed=seed, backtrack=backtrack)).display(axs[3])
     plt.show()
 
-def draw_wfc_selection_heuristics(unit_generator, size, seed=42, backtrack=False, axs=None,
-                                 weighting_option=WeightingOptions.NONE, updating_option=UpdatingOptions.CHAIN):
+def visualize_wfc_selection_heuristics(unit_generator, size, seed=42, backtrack=False, axs=None,
+                                 weighting_option=WeightingOptions.UNIFORM, updating_option=UpdatingOptions.CHAIN):
     print("breaking input into tiles...")
     ti = TiledImage.from_unit_generator(unit_generator)
     if axs is None:
@@ -97,19 +97,19 @@ def draw_wfc_selection_heuristics(unit_generator, size, seed=42, backtrack=False
     ti.from_generated(wfc.generate(size, seed=seed, backtrack=backtrack)).display(axs[4])
     plt.show()
 
-def draw_single_wfc(unit_generator, size, seed=42, backtrack=False, weighting_option=WeightingOptions.NONE,
+def visualize_single_wfc(unit_generator, size, seed=42, backtrack=False, weighting_option=WeightingOptions.UNIFORM,
                         entropy_option=EntropyOptions.TOP_LEFT, updating_option=UpdatingOptions.CHAIN):
     print("breaking input into tiles...")
     ti = TiledImage.from_unit_generator(unit_generator)
-    weighting_str = 'Uniform' if weighting_option==WeightingOptions.NONE else\
-                    'Tile Frequency' if weighting_option==WeightingOptions.FREQUENCY_WEIGHTED else\
-                    'Context-sensitive' if weighting_option==WeightingOptions.CONTEXT_WEIGHTED else 'UNKNOWN'
+    weighting_str = 'Uniform' if weighting_option==WeightingOptions.UNIFORM else\
+                    'Tile Frequency' if weighting_option==WeightingOptions.TILE_FREQUENCY else\
+                    'Context-sensitive' if weighting_option==WeightingOptions.CONTEXT_SENSITIVE else 'UNKNOWN'
     plt.title('WFC with {} Decision Heuristic'.format(weighting_str), fontsize=22)
     print("training the distribution...")
     id = ImageDistribution()
     id.train(ti)
     print("running wfc...")
-    wfc = WFC(id, WeightingOptions.NONE, updating_option, entropy_option)
+    wfc = WFC(id, weighting_option, updating_option, entropy_option)
     ti.from_generated(wfc.generate(size, seed=seed, backtrack=backtrack)).display()
     plt.show()
 
@@ -121,18 +121,18 @@ def main():
 
     output_size = (20, 20)
 
-    draw_wfc_decision_heuristics(TileGenerator(stick_data, stick_tile_size), output_size)
-    draw_wfc_decision_heuristics(TileGenerator(zelda_data, zelda_tile_size), output_size, backtrack=True)
+    # visualize_wfc_decision_heuristics(TileGenerator(stick_data, stick_tile_size), output_size)
+    visualize_wfc_decision_heuristics(TileGenerator(zelda_data, zelda_tile_size), output_size, backtrack=True, entropy_option=EntropyOptions.NUMBER_OF_OPTIONS)
 
     # Bigger patterns (can take sometime, because of exponential growth in the number of options in bigger patterns):
     # (e.g. zelda has 90 tiles, but over 2900 3x3 patterns)
     # 3x3 patterns
-    # draw_wfc_decision_heuristics(nxmPatternGenerator(zelda_data, zelda_tile_size, 3, 3), output_size)
+    # visualize_wfc_decision_heuristics(nxmPatternGenerator(zelda_data, zelda_tile_size, 3, 3), output_size)
     # L shape patterns
-    # draw_wfc_decision_heuristics(UpLeftLPatternGenerator(zelda_data, zelda_tile_size, 3, 3), output_size)
+    # visualize_wfc_decision_heuristics(UpLeftLPatternGenerator(zelda_data, zelda_tile_size, 3, 3), output_size)
 
     # to see how the patterns look like, you can run something like this:
-    # draw_tile_vs_pattern(zelda_data[16*45:16*50, 16*84:16*89], zelda_tile_size,
+    # visualize_tile_vs_pattern(zelda_data[16*45:16*50, 16*84:16*89], zelda_tile_size,
     #                    lambda data, tile_size: nxmPatternGenerator(data, tile_size, 3, 3))
     # in this example, we are showing part of zelda data as both 3x3 patterns and tiles. 16x16 is the tile size in the zelda example.
     
@@ -143,7 +143,7 @@ def main():
     # You can use backtracking to ensure no contradictions by adding backtrack=True,
     # but this will increase the execution time significantly, specially for bigger patterns.
     # example:
-    # draw_wfc_decision_heuristics(TileGenerator(zelda_data, zelda_tile_size), output_size, backtrack=True)
+    # visualize_wfc_decision_heuristics(TileGenerator(zelda_data, zelda_tile_size), output_size, backtrack=True)
 
     # - entropy
     # If you see some artifacts of tile regions going from top left to bottom right
@@ -151,16 +151,16 @@ def main():
     # this can be because of the fact that the tiles are selected in order from top left to bottom right
     # this creates biasses in the result that can be solved with using another entropy option such as shannon
     # example:
-    # draw_wfc_decision_heuristics(TileGenerator(zelda_data, zelda_tile_size), output_size, entropy_option=EntropyOptions.SHANNON)
+    # visualize_wfc_decision_heuristics(TileGenerator(zelda_data, zelda_tile_size), output_size, entropy_option=EntropyOptions.SHANNON)
 
     # getting gif outputs
     # TODO
 
-    # drawing a single output
-    # draw_single_wfc(TileGenerator(zelda_data, zelda_tile_size), output_size, backtrack=True)
+    # visualizing a single output
+    # visualize_single_wfc(TileGenerator(zelda_data, zelda_tile_size), output_size, backtrack=True)
 
     # comparing selection heuristics
-    # draw_wfc_selection_heuristics(TileGenerator(zelda_data, zelda_tile_size), output_size, backtrack=True, weighting_option=WeightingOptions.CONTEXT_WEIGHTED)
+    # visualize_wfc_selection_heuristics(TileGenerator(zelda_data, zelda_tile_size), output_size, backtrack=True, weighting_option=WeightingOptions.CONTEXT_SENSITIVE)
 
 
 if __name__ == "__main__":
