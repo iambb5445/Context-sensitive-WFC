@@ -1,4 +1,5 @@
 import numpy as np
+from typing import Tuple
 from image_distribution import ImageDistribution
 from utility import in_bound
 
