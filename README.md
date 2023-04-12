@@ -307,8 +307,8 @@ The following features have been implemetned but are not part of this repository
 - 3D WFC: my implementation also contains the code to read/write minecraft data as an exmaple of this
 <p align="center">
   <img alt="uniform decision heuristic minecraft" src="https://user-images.githubusercontent.com/25642714/231454252-49c66345-2147-4888-8d9c-2b6d64ce1443.jpg" width="300">
-  <img alt="tile frequency decision heuristic gif" src="https://user-images.githubusercontent.com/25642714/231454261-78d8400c-1ee9-4b94-b8cf-e9ee87eeebdf.jpg" width="300">
-  <img alt="context-sensitive decision heuristic gif" src="https://user-images.githubusercontent.com/25642714/231454262-e119fdc5-1e94-422a-bb52-5e73aca6cd94.jpg" width="300">
+  <img alt="tile frequency decision heuristic minecraft" src="https://user-images.githubusercontent.com/25642714/231454262-e119fdc5-1e94-422a-bb52-5e73aca6cd94.jpg" width="300">
+  <img alt="context-sensitive decision heuristic minecraft" src="https://user-images.githubusercontent.com/25642714/231454261-78d8400c-1ee9-4b94-b8cf-e9ee87eeebdf.jpg" width="300">
 </p>
 
 - M Dimensional Implementation: my implementation for M dimensions is a bit complicated and harder to read than the 2D implementation. While very similar, the 2D implementation is a lot easier to understand because it doesn't use any fancy functions. For example it uses a nested `for` loop instead of an `ndenumerate` loop.
