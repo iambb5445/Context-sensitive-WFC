@@ -14,8 +14,8 @@ class UpdatingOptions:
 class EntropyOptions:
     NUMBER_OF_OPTIONS = 1
     SHANNON = 2 #Gumin's
-    UP_LEFT = 3
-    BOTTOM_RIGHT = 4
+    TOP_LEFT = 3
+    TOP_RIGHT = 4
 
 class ExistingTile:
     def __init__(self, pos, tile_number):
@@ -72,10 +72,10 @@ class WFC:
             return np.log(np.sum(weights)) - (np.sum(weights * np.log(weights)) / np.sum(weights))
         elif self.entropy_option == EntropyOptions.NUMBER_OF_OPTIONS:
             return len(supermap[x, y])
-        elif self.entropy_option == EntropyOptions.UP_LEFT:
+        elif self.entropy_option == EntropyOptions.TOP_LEFT:
             return x * map_size[1] + y
-        elif self.entropy_option == EntropyOptions.BOTTOM_RIGHT:
-            return - (x * map_size[1] + y) 
+        elif self.entropy_option == EntropyOptions.TOP_RIGHT:
+            return x * map_size[1] + (map_size[0] - y)
         raise Exception("entropy option not implemented!")
 
     def _get_position_to_collapse(self, supermap, map_size):
