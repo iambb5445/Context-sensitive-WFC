@@ -3,7 +3,8 @@
 This is the code for the "Better Resemblance without Bigger Patterns: Making Context-sensitive Decisions in WFC" paper by Bahar Bateni, Isaac Karth and Adam Smith. 
 The paper was published at FDG 2023 and is available at https://dl.acm.org/doi/10.1145/3582437.3582441.
 
-![Figure_1](https://user-images.githubusercontent.com/25642714/231170868-24e1baa5-e98f-4236-ace0-d76263a730c0.png)
+<p align="center"><img alt="decision heuristics" src="figures/fig_decision_heuristics.png"></p>
+<p align="center"><img alt="uniform decision heuristic gif" src="figures/gif_Uniform.gif"></p>
 
 The paper proposes a small and easy to implement modification to the WaveFunctionCollapse algorithm which significantly improves the quality fo results.
 
