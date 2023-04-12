@@ -324,9 +324,9 @@ If you want to talk about this, feel free to contact me by emailing me at bbaten
 
 Possible areas of investigation:
 
-- What is the effect of changing the context?
-- How can we implement this in a WFC on a graph?
-- What's the impact the selection heuristic on resemblance?
+- What is the effect of changing the context definition?
+- How can we implement this for a WFC on a graph?
+- Can we further improve the resemblance by modifying the selection heuristic?
 
 ## FAQ
 
