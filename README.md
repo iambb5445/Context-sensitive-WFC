@@ -46,7 +46,9 @@ To learn more, refer to virtualenv documents.
 
 You can run the WFC algorithm by running the main script:
 
-`python main.py`
+```bash
+python main.py
+```
 
 This would results in generating one output per each of the *Decision Heuristic*s for the zelda example.
 The result will differ each time. To get the same results everytime, change the `GLOBAL_HASH_TYPE` in the `utility.py` file:
