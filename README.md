@@ -4,7 +4,11 @@ This is the code for the "Better Resemblance without Bigger Patterns: Making Con
 The paper was published at FDG 2023 and is available at https://dl.acm.org/doi/10.1145/3582437.3582441.
 
 <p align="center"><img alt="decision heuristics" src="figures/fig_decision_heuristics.png"></p>
-<p align="center"><img alt="uniform decision heuristic gif" src="figures/gif_Uniform.gif"></p>
+<p align="center">
+  <img alt="uniform decision heuristic gif" src="figures/gif_Uniform.gif" width="200">
+  <img alt="tile frequency decision heuristic gif" src="figures/gif_Tile Frequency.gif" width="200">
+  <img alt="context-sensitive decision heuristic gif" src="figures/gif_Context-sensitive.gif" width="200">
+</p>
 
 The paper proposes a small and easy to implement modification to the WaveFunctionCollapse algorithm which significantly improves the quality fo results.
 
