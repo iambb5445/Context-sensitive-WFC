@@ -4,6 +4,7 @@ import matplotlib.pyplot as plt
 from tiled_image import TiledImage, TileGenerator, nxmPatternGenerator, UpLeftLPatternGenerator
 from WFC import EntropyOptions, WeightingOptions, UpdatingOptions, WFC
 from image_distribution import ImageDistribution
+from utility import GifMaker
 
 def get_stick_data():
     arr = np.ones((7, 7, 3)) * 0.4
@@ -113,6 +114,21 @@ def visualize_single_wfc(unit_generator, size, seed=42, backtrack=False, weighti
     ti.from_generated(wfc.generate(size, seed=seed, backtrack=backtrack)).display()
     plt.show()
 
+def save_wfc_gif(unit_generator, size, gif_name, seed=42, backtrack=False, weighting_option=WeightingOptions.UNIFORM,
+                entropy_option=EntropyOptions.TOP_LEFT, updating_option=UpdatingOptions.CHAIN,  
+                fps=24, repeat=False, is_gif_weighted=True):
+    print("breaking input into tiles...")
+    ti = TiledImage.from_unit_generator(unit_generator)
+    print("training the distribution...")
+    id = ImageDistribution()
+    id.train(ti)
+    print("running wfc in creating the gif frames...")
+    wfc = WFC(id, weighting_option, updating_option, entropy_option)
+    gm = GifMaker(wfc, ti, is_gif_weighted)
+    wfc.generate(size, seed=seed, backtrack=backtrack, gif_maker=gm)
+    print("saving the gif...")
+    gm.save_gif(gif_name, fps=fps, repeat=repeat)
+
 def main():
     stick_data = get_stick_data()
     stick_tile_size = (1, 1) # each tile is 1x1 pixels
@@ -122,7 +138,8 @@ def main():
     output_size = (20, 20)
 
     # visualize_wfc_decision_heuristics(TileGenerator(stick_data, stick_tile_size), output_size)
-    visualize_wfc_decision_heuristics(TileGenerator(zelda_data, zelda_tile_size), output_size, backtrack=True, entropy_option=EntropyOptions.NUMBER_OF_OPTIONS)
+    visualize_wfc_decision_heuristics(TileGenerator(zelda_data, zelda_tile_size), output_size,
+                                        backtrack=True, entropy_option=EntropyOptions.NUMBER_OF_OPTIONS)
 
     # Bigger patterns (can take sometime, because of exponential growth in the number of options in bigger patterns):
     # (e.g. zelda has 90 tiles, but over 2900 3x3 patterns)
@@ -154,7 +171,14 @@ def main():
     # visualize_wfc_decision_heuristics(TileGenerator(zelda_data, zelda_tile_size), output_size, entropy_option=EntropyOptions.SHANNON)
 
     # getting gif outputs
-    # TODO
+    # You can use the save_wfc_gif function to get gif outputs. This will take some time, around a minute for each of the example below
+    # all the options are till availabe (backtrack, heuristic, etc)
+    # save_wfc_gif(TileGenerator(zelda_data, zelda_tile_size), output_size, 'Uniform', repeat=True,
+    #             backtrack=True, entropy_option=EntropyOptions.NUMBER_OF_OPTIONS, weighting_option=WeightingOptions.UNIFORM)
+    # save_wfc_gif(TileGenerator(zelda_data, zelda_tile_size), output_size, 'Tile Frequency', repeat=True,
+    #             backtrack=True, entropy_option=EntropyOptions.NUMBER_OF_OPTIONS, weighting_option=WeightingOptions.TILE_FREQUENCY)
+    # save_wfc_gif(TileGenerator(zelda_data, zelda_tile_size), output_size, 'Context-sensitive', repeat=True,
+    #             backtrack=True, entropy_option=EntropyOptions.NUMBER_OF_OPTIONS, weighting_option=WeightingOptions.CONTEXT_SENSITIVE)
 
     # visualizing a single output
     # visualize_single_wfc(TileGenerator(zelda_data, zelda_tile_size), output_size, backtrack=True)

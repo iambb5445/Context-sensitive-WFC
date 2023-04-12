@@ -48,3 +48,34 @@ def get_arrays_hash(arr1, arr2):
         return get_array_hash(arr1) + get_array_hash(arr2)
     else:
         raise Ecxeption("Unknown hash type")
+
+
+class GifMaker:
+    def __init__(self, wfc, tiled_image, is_weighted=True):
+        self.tiled_image = tiled_image
+        self.is_weighted = is_weighted
+        self.wfc = wfc
+        self.frames = []
+
+    def add_frame(self, supermap):
+        unit_shape = self.tiled_image.blank.get_display_data().shape
+        frame = np.array([[[0.0 for _ in range(unit_shape[2])]
+                                for _ in range(len(supermap[0]) * unit_shape[1])]
+                                for _ in range(len(supermap) * unit_shape[0])])
+        for i, row in enumerate(supermap):
+            for j, options in enumerate(row):
+                if not self.is_weighted:
+                    probs = np.ones(options.shape) / len(options)
+                else:
+                    probs = self.wfc._get_probabilities(supermap, i, j)
+                for k, option in enumerate(options):
+                    data = np.array(self.tiled_image.number_to_unit[option].get_display_data())
+                    frame[i*unit_shape[0]:(i+1)*unit_shape[0], j*unit_shape[1]:(j+1)*unit_shape[1]] += data * probs[k]
+        self.frames.append((frame * 255).astype(np.uint8))
+
+    def save_gif(self, gif_name, fps=24, repeat=False):
+        import imageio
+        imageio.mimsave(f'./{gif_name}.gif',
+                        self.frames,
+                        fps = fps,
+                        loop = 0 if repeat else 1)

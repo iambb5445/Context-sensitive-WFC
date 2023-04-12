@@ -125,7 +125,7 @@ class WFC:
             self._update_supermap(x, y, supermap)
         return supermap
 
-    def generate_bt(self, map_size, existing_tiles=[]):
+    def generate_bt(self, map_size, existing_tiles=[], gif_maker=None):
         self._bt_counter = 0
         supermap = self._get_initial_supermap(map_size, existing_tiles)
         tested = np.array([[None for _ in range(map_size[1])] for _ in range(map_size[0])], dtype=object)
@@ -162,19 +162,26 @@ class WFC:
                 # checkpoint
                 checkpoints.append((supermap, tested))
             self._bt_counter += 1
+        if gif_maker is not None:
+            for checkpoint in checkpoints:
+                c_supermap, _ = checkpoint
+                gif_maker.add_frame(c_supermap)
+            gif_maker.add_frame(supermap)
         map = np.array([[possibilities[0] if len(possibilities) > 0 else None for possibilities in row] for row in supermap])
         return map
 
-    def generate(self, map_size, seed=0, existing_tiles=[], backtrack=False):
+    def generate(self, map_size, seed=0, existing_tiles=[], backtrack=False, gif_maker=None):
         np.random.seed(seed)
         if backtrack:
-            return self.generate_bt(map_size, existing_tiles)
-        supermap = self._get_initial_supermap(map_size, existing_tiles)
+            return self.generate_bt(map_size, existing_tiles, gif_maker)
+        supermap = self._get_initial_supermap(map_size, existing_tiles, gif_maker)
+        if gif_maker is not None: gif_maker.add_frame(supermap)
         while True:
             x, y = self._get_position_to_collapse(supermap, map_size)
             if x is None or y is None:
                 break
             self._collapse(supermap, x, y, map_size)
             self._update_supermap(x, y, supermap)
+            if gif_maker is not None: gif_maker.add_frame(supermap)
         map = np.array([[possibilities[0] if len(possibilities) > 0 else None for possibilities in row] for row in supermap])
         return map
