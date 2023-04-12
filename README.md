@@ -3,7 +3,7 @@
 This is the code for the "Better Resemblance without Bigger Patterns: Making Context-sensitive Decisions in WFC" paper by Bahar Bateni, Isaac Karth and Adam Smith. 
 The paper was published at FDG 2023 and is available at https://dl.acm.org/doi/10.1145/3582437.3582441.
 
-<p align="center"><img alt="decision heuristics" src="figures/fig_decision_heuristics.png"></p>
+<p align="center"><img alt="decision heuristics" src="figures/fig_main.png"></p>
 <p align="center">
   <img alt="uniform decision heuristic gif" src="figures/gif_Uniform.gif" width="200">
   <img alt="tile frequency decision heuristic gif" src="figures/gif_Tile Frequency.gif" width="200">
@@ -106,7 +106,7 @@ will also affect the *Selection* process. For example, when the *Decision Heuris
 
 For visualizing the *Selection Heuristic*s side-by-side, `visualize_wfc_selection_heuristics` function in the `main.py` file can be used. An example of this generated with the Context-sensitive *Decision Heuristic* on zelda example is shown below:
 
-![Figure_2](https://user-images.githubusercontent.com/25642714/231180741-ca1caaee-b6e6-4d56-84b5-08168d6a36dd.png)
+<p align="center"><img alt="decision heuristics" src="figures/fig_selection_heuristics.png"></p>
 
 As you can see, using the `TOP_LEFT` and `TOP_RIGHT` option results in some diagonal pattern artifacts in the output.
 
@@ -126,7 +126,7 @@ If the context is new to us, we use the general frequency of tile in a completel
 
 For visualizing the *Decision Heuristic*s side-by-side, `visualize_wfc_decision_heuristics` function in the `main.py` file can be used. An example of this generated with the number of options *Selection Heuristic* on zelda example is shown below:
 
-![Figure_3](https://user-images.githubusercontent.com/25642714/231361694-20e6d57b-3d85-4297-bcf4-1cf29a5b7dc4.png)
+<p align="center"><img alt="decision heuristics" src="figures/fig_decision_heuristics.png"></p>
 
 ## Implementaiton Details
 
