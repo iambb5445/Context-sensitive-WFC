@@ -349,4 +349,4 @@ to
 ```python
 GLOBAL_HASH_TYPE = HASH_TYPE.NUMBER_HASH
 ```
-in the `utility.py` file. The `NUMBER_HASH` hashing method is deterministic, but will make the tile extraction process significantly slower, but doesn't have any impact on the execution time of other parts such as the WFC algorithm.
+in the `utility.py` file. The `NUMBER_HASH` hashing method is deterministic, but will make the tile extraction process significantly slower. Note that this doesn't have any impact on the execution time of other parts such as the WFC algorithm and only affects the pre-processing of input image.
