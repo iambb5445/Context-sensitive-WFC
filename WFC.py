@@ -122,7 +122,7 @@ class WFC:
         for existing_tile in existing_tiles:
             i, j = existing_tile.pos
             supermap[i, j] = np.array([existing_tile.tile_number])
-            self._update_supermap(x, y, supermap)
+            self._update_supermap(i, j, supermap)
         return supermap
 
     def generate_bt(self, map_size, existing_tiles=[], gif_maker=None):
@@ -174,7 +174,7 @@ class WFC:
         np.random.seed(seed)
         if backtrack:
             return self.generate_bt(map_size, existing_tiles, gif_maker)
-        supermap = self._get_initial_supermap(map_size, existing_tiles, gif_maker)
+        supermap = self._get_initial_supermap(map_size, existing_tiles)
         if gif_maker is not None: gif_maker.add_frame(supermap)
         while True:
             x, y = self._get_position_to_collapse(supermap, map_size)

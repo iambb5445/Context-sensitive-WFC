@@ -81,19 +81,19 @@ def visualize_wfc_selection_heuristics(unit_generator, size, seed=42, backtrack=
     id = ImageDistribution()
     id.train(ti)
     print("running wfc with top-left to bottom-right selection heuristic...")
-    axs[1].set_title('Top-Left', fontsize=20)
+    axs[1].set_title('Top-Left', fontsize=15)
     wfc = WFC(id, weighting_option, updating_option, EntropyOptions.TOP_LEFT)
     ti.from_generated(wfc.generate(size, seed=seed, backtrack=backtrack)).display(axs[1])
     print("running wfc with top-right to bottom-left selection heuristic...")
-    axs[2].set_title('Top-right', fontsize=20)
+    axs[2].set_title('Top-right', fontsize=15)
     wfc = WFC(id, weighting_option, updating_option, EntropyOptions.TOP_RIGHT)
     ti.from_generated(wfc.generate(size, seed=seed, backtrack=backtrack)).display(axs[2])
     print("running wfc with number of options selection heuristic...")
-    axs[3].set_title('Number of Options', fontsize=20)
+    axs[3].set_title('Number of Options', fontsize=15)
     wfc = WFC(id, weighting_option, updating_option, EntropyOptions.NUMBER_OF_OPTIONS)
     ti.from_generated(wfc.generate(size, seed=seed, backtrack=backtrack)).display(axs[3])
     print("running wfc with shannon entropy selection heuristic...")
-    axs[4].set_title('Shannon Entropy', fontsize=20)
+    axs[4].set_title('Shannon Entropy', fontsize=15)
     wfc = WFC(id, weighting_option, updating_option, EntropyOptions.SHANNON)
     ti.from_generated(wfc.generate(size, seed=seed, backtrack=backtrack)).display(axs[4])
     plt.show()
@@ -102,10 +102,14 @@ def visualize_single_wfc(unit_generator, size, seed=42, backtrack=False, weighti
                         entropy_option=EntropyOptions.TOP_LEFT, updating_option=UpdatingOptions.CHAIN):
     print("breaking input into tiles...")
     ti = TiledImage.from_unit_generator(unit_generator)
-    weighting_str = 'Uniform' if weighting_option==WeightingOptions.UNIFORM else\
-                    'Tile Frequency' if weighting_option==WeightingOptions.TILE_FREQUENCY else\
-                    'Context-sensitive' if weighting_option==WeightingOptions.CONTEXT_SENSITIVE else 'UNKNOWN'
-    plt.title('WFC with {} Decision Heuristic'.format(weighting_str), fontsize=22)
+    decision_str = 'Uniform' if weighting_option==WeightingOptions.UNIFORM else\
+        'Tile Frequency' if weighting_option==WeightingOptions.TILE_FREQUENCY else\
+        'Context-sensitive' if weighting_option==WeightingOptions.CONTEXT_SENSITIVE else 'UNKNOWN'
+    selection_str = 'Top-left' if entropy_option==EntropyOptions.TOP_LEFT else\
+        'Top-right' if entropy_option==EntropyOptions.TOP_RIGHT else\
+        'Number-of-options' if entropy_option==EntropyOptions.NUMBER_OF_OPTIONS else\
+        'Shannon' if entropy_option==EntropyOptions.SHANNON else 'UNKNOWN'
+    plt.title(f'WFC - {decision_str} Decision and {selection_str} Selection Heuristic', fontsize=15)
     print("training the distribution...")
     id = ImageDistribution()
     id.train(ti)
@@ -137,54 +141,76 @@ def main():
 
     output_size = (20, 20)
 
-    # visualize_wfc_decision_heuristics(TileGenerator(stick_data, stick_tile_size), output_size)
-    visualize_wfc_decision_heuristics(TileGenerator(zelda_data, zelda_tile_size), output_size,
-                                        backtrack=True, entropy_option=EntropyOptions.NUMBER_OF_OPTIONS)
+    ### Comparing Decition Heuristics
+    # to compare decision heuristics, use:
+    #>>> visualize_wfc_decision_heuristics(TileGenerator(zelda_data, zelda_tile_size), output_size,
+    #>>>                                    backtrack=True, entropy_option=EntropyOptions.NUMBER_OF_OPTIONS)
+    # this will generate an output containing source image and the output of running WFC with each decision heuristic
+    # the other options (selection heuristic, backtrack, etc.) are the same for all of the outputs
+    # for alternative types of output, refer to # Other Types of Output
 
-    # Bigger patterns (can take sometime, because of exponential growth in the number of options in bigger patterns):
-    # (e.g. zelda has 90 tiles, but over 2900 3x3 patterns)
+    ### Bigger patterns
+    # this can be slow because of exponential growth in the number of options in bigger patterns
+    # e.g. zelda example has 90 tiles, but over 2900 3x3 patterns
+    # to avoid generating white tiles, refere to ### Backtrack Option
     # 3x3 patterns
-    # visualize_wfc_decision_heuristics(nxmPatternGenerator(zelda_data, zelda_tile_size, 3, 3), output_size)
+    #>>> visualize_wfc_decision_heuristics(nxmPatternGenerator(zelda_data, zelda_tile_size, 3, 3), output_size)
     # L shape patterns
-    # visualize_wfc_decision_heuristics(UpLeftLPatternGenerator(zelda_data, zelda_tile_size, 3, 3), output_size)
+    #>>> visualize_wfc_decision_heuristics(UpLeftLPatternGenerator(zelda_data, zelda_tile_size, 3, 3), output_size)
 
     # to see how the patterns look like, you can run something like this:
-    # visualize_tile_vs_pattern(zelda_data[16*45:16*50, 16*84:16*89], zelda_tile_size,
-    #                    lambda data, tile_size: nxmPatternGenerator(data, tile_size, 3, 3))
     # in this example, we are showing part of zelda data as both 3x3 patterns and tiles. 16x16 is the tile size in the zelda example.
+    # 3x3 patterns
+    #>>> visualize_tile_vs_pattern(zelda_data[16*45:16*50, 16*84:16*89], zelda_tile_size,
+    #>>>                    lambda data, tile_size: nxmPatternGenerator(data, tile_size, 3, 3))
+    # L shape patterns
+    #>>> visualize_tile_vs_pattern(zelda_data[16*45:16*50, 16*84:16*89], zelda_tile_size,
+    #>>>                    lambda data, tile_size: UpLeftLPatternGenerator(data, tile_size, 3, 3))
     
     # Other options:
 
-    # - backtrack
-    # If you see white tiles, these are contradictions.
-    # You can use backtracking to ensure no contradictions by adding backtrack=True,
-    # but this will increase the execution time significantly, specially for bigger patterns.
+    ### Backtrack Option
+    # white tiles in the output show contradictions
+    # at some point, there were no possible tile option left for that position due to the the existing constraints
+    # you can use backtracking by adding backtrack=True to gurantee an output without missing tiles
+    # this will increase the execution time significantly, specially for bigger patterns
     # example:
-    # visualize_wfc_decision_heuristics(TileGenerator(zelda_data, zelda_tile_size), output_size, backtrack=True)
+    #>>> visualize_wfc_decision_heuristics(TileGenerator(zelda_data, zelda_tile_size), output_size, backtrack=True)
 
-    # - entropy
-    # If you see some artifacts of tile regions going from top left to bottom right
-    # (specially apparent when generating bigger grids - try generating 100x100 intstaed of 20x20),
-    # this can be because of the fact that the tiles are selected in order from top left to bottom right
-    # this creates biasses in the result that can be solved with using another entropy option such as shannon
+    ### Entropy Option
+    # the output might have tile regions going from top left to bottom right
+    # this is specially apparent when generating bigger grids - e.g. generating 100x100 intstaed of 20x20
+    # this is due to selection heuristic, in which the tiles are selected in order from top left to bottom right
+    # it creates biasses in the result that can be solved with using another selection heuristic
+    # such as using shannon entropy for selecting a tile position
     # example:
-    # visualize_wfc_decision_heuristics(TileGenerator(zelda_data, zelda_tile_size), output_size, entropy_option=EntropyOptions.SHANNON)
+    #>>> visualize_wfc_decision_heuristics(TileGenerator(zelda_data, zelda_tile_size), output_size, entropy_option=EntropyOptions.SHANNON)
+    # to better visualize the different between entropy options, refer to ### Comparing Selection Heuristics
 
-    # getting gif outputs
-    # You can use the save_wfc_gif function to get gif outputs. This will take some time, around a minute for each of the example below
-    # all the options are till availabe (backtrack, heuristic, etc)
-    # save_wfc_gif(TileGenerator(zelda_data, zelda_tile_size), output_size, 'Uniform', repeat=True,
-    #             backtrack=True, entropy_option=EntropyOptions.NUMBER_OF_OPTIONS, weighting_option=WeightingOptions.UNIFORM)
-    # save_wfc_gif(TileGenerator(zelda_data, zelda_tile_size), output_size, 'Tile Frequency', repeat=True,
-    #             backtrack=True, entropy_option=EntropyOptions.NUMBER_OF_OPTIONS, weighting_option=WeightingOptions.TILE_FREQUENCY)
-    # save_wfc_gif(TileGenerator(zelda_data, zelda_tile_size), output_size, 'Context-sensitive', repeat=True,
-    #             backtrack=True, entropy_option=EntropyOptions.NUMBER_OF_OPTIONS, weighting_option=WeightingOptions.CONTEXT_SENSITIVE)
+    # Other Types of Output:
+
+    ### Gif Output
+    # you can use the save_wfc_gif function to get gif outputs
+    # this will take some time, around a minute for each of the example below
+    # all the options are till availabe (backtrack, entropy/selection heuristic, decision heuristic, etc)
+    #>>> save_wfc_gif(TileGenerator(zelda_data, zelda_tile_size), output_size, 'Uniform', repeat=True,
+    #>>>             backtrack=True, entropy_option=EntropyOptions.NUMBER_OF_OPTIONS, weighting_option=WeightingOptions.UNIFORM)
+    #>>>
+    #>>> save_wfc_gif(TileGenerator(zelda_data, zelda_tile_size), output_size, 'Tile Frequency', repeat=True,
+    #>>>             backtrack=True, entropy_option=EntropyOptions.NUMBER_OF_OPTIONS, weighting_option=WeightingOptions.TILE_FREQUENCY)
+    #>>>
+    #>>> save_wfc_gif(TileGenerator(zelda_data, zelda_tile_size), output_size, 'Context-sensitive', repeat=True,
+    #>>>             backtrack=True, entropy_option=EntropyOptions.NUMBER_OF_OPTIONS, weighting_option=WeightingOptions.CONTEXT_SENSITIVE)
+
+    # Comparing Selection Heuristics
+    # to compare selection heuristics, use:
+    #>>> visualize_wfc_selection_heuristics(TileGenerator(zelda_data, zelda_tile_size), output_size, backtrack=True, weighting_option=WeightingOptions.CONTEXT_SENSITIVE)
+    # this will generate an output containing source image and the output of running WFC with each selection heuristic
+    # the other options (decision heuristic, backtrack, etc.) are the same for all of the outputs
 
     # visualizing a single output
-    # visualize_single_wfc(TileGenerator(zelda_data, zelda_tile_size), output_size, backtrack=True)
+    #>>> visualize_single_wfc(TileGenerator(zelda_data, zelda_tile_size), output_size, backtrack=True)
 
-    # comparing selection heuristics
-    # visualize_wfc_selection_heuristics(TileGenerator(zelda_data, zelda_tile_size), output_size, backtrack=True, weighting_option=WeightingOptions.CONTEXT_SENSITIVE)
 
 
 if __name__ == "__main__":

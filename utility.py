@@ -38,7 +38,7 @@ def get_array_hash(arr):
             out %= big_prime
         return out
     else:
-        raise Ecxeption("Unknown hash type")
+        raise Exception("Unknown hash type")
 
 def get_arrays_hash(arr1, arr2):
     if GLOBAL_HASH_TYPE == HASH_TYPE.PYTHON_HASH:
@@ -47,7 +47,7 @@ def get_arrays_hash(arr1, arr2):
         # not a good way, but in this case doesn't matter.
         return get_array_hash(arr1) + get_array_hash(arr2)
     else:
-        raise Ecxeption("Unknown hash type")
+        raise Exception("Unknown hash type")
 
 
 class GifMaker:
