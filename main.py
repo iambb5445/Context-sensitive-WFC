@@ -143,8 +143,8 @@ def main():
 
     ### Comparing Decition Heuristics
     # to compare decision heuristics, use:
-    #>>> visualize_wfc_decision_heuristics(TileGenerator(zelda_data, zelda_tile_size), output_size,
-    #>>>                                    backtrack=True, entropy_option=EntropyOptions.NUMBER_OF_OPTIONS)
+    visualize_wfc_decision_heuristics(TileGenerator(zelda_data, zelda_tile_size), output_size,
+                                       backtrack=True, entropy_option=EntropyOptions.NUMBER_OF_OPTIONS)
     # this will generate an output containing source image and the output of running WFC with each decision heuristic
     # the other options (selection heuristic, backtrack, etc.) are the same for all of the outputs
     # for alternative types of output, refer to # Other Types of Output
